@@ -9,3 +9,7 @@ def admin():
 @app.get("/hello/{name}")
 def hello(name: str):
     return{"Message": f"Hello, {name}"}         
+
+@app.get("/square/{sqr}")
+def square(sqr:int):
+    return{f"Square of {sqr}": sqr * sqr}
