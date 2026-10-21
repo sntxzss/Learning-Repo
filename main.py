@@ -2,11 +2,10 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+@app.get("/hello/admin")
+def admin():
+    return{"Message": "Hello, Admin"}    
 
-@app.get("/users/me")         
-def read_current_user():
-    return {"user": "That's me"}
-
-@app.get("/users/{user.id}")
-def users(user_id: int):
-    return {"user_id": user_id, "next_id": user_id + 1}
+@app.get("/hello/{name}")
+def hello(name: str):
+    return{"Message": f"Hello, {name}"}         
