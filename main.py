@@ -2,14 +2,11 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/hello/admin")
-def admin():
-    return{"Message": "Hello, Admin"}    
+@app.get("/add")
+def add(a: float, b: float):
+    return{"a": a, "b": b, "Add": a +  b}
 
-@app.get("/hello/{name}")
-def hello(name: str):
-    return{"Message": f"Hello, {name}"}         
+@app.get("multiply") 
+def multiply(a: float, b: float):
+    return{"a": a, "b": b, "multiply": a *  b}
 
-@app.get("/square/{sqr}")
-def square(sqr:int):
-    return{f"Square of {sqr}": sqr * sqr}
