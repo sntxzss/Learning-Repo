@@ -15,12 +15,16 @@ MOVIES = [
 def allmovies():
     return MOVIES
 
-@app.get("/movies/{m_id}")
+@app.get("/movies/id/{m_id}")
 def find_id(m_id: int):
     for movie in MOVIES:
         if movie["id"] == m_id:
             return movie
     raise HTTPException(status_code=404, detail="Not found")
 
-@app.get("/movies/{genre}")
-def find_genre(genre: str)
+@app.get("/movies/genre/{genre}")
+def find_genre(genre: str):
+    results = [movie for movie in MOVIES if movie["genre"].lower() == genre.lower()]
+    if results:
+        return results
+    raise HTTPException(status_code=404, detail="Not Found")
