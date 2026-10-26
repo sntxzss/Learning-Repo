@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ValidationError
+import json
 class Pet(BaseModel):
     name: str 
     species: str
@@ -28,3 +29,11 @@ for i, raw in enumerate(RawPets, start=1):
         for err in e.errors():
             print(f"Error in {err}")
 
+if valid:
+    average_age = sum(p.age for p in valid) / len(valid)
+    print(f"\nMid age: {average_age}")
+    with open("pets_valid.json", "w", encoding="utf-8") as f:
+        json.dump([p.model_dump() for p in valid], f, ensure_ascii=False, indent=2)
+    print("File saved.")
+
+    
