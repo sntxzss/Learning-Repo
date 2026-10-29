@@ -1,30 +1,23 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
-app = FastAPI(title="Movies API")
+app = FastAPI()
 
-MOVIES = [
-    {"id":1 ,"title":"Mark","year": 2222,"genre": "Thriller","rating": 1},
-    {"id":2 ,"title":"Sntxzss" ,"year": 2000,"genre": "Romantic","rating": 5},
-    {"id":3 ,"title":"Anna" ,"year": 1902,"genre": "Romantic","rating": 3},
-    {"id":4 ,"title":"Kevin" ,"year": 2039,"genre": "Thriller","rating": 5},
-    {"id":5 ,"title":"Andreq" ,"year": 9000,"genre": "Absolute Cinema","rating": 6},
-    {"id":6 ,"title":"2 Years" ,"year": 2039,"genre": "Trash","rating": 7}
-]
+class MessageIn(BaseModel):
+    author: str = Field(min_length=2, max_length=30)
+    text: str = Field(min_length=1, max_length=200)
 
-@app.get("/movies")
-def allmovies():
-    return MOVIES
+messages: list[dict] = []   # «база даних» у пам'яті
+next_id = 1                  # лічильник для нових id
 
-@app.get("/movies/id/{m_id}")
-def find_id(m_id: int):
-    for movie in MOVIES:
-        if movie["id"] == m_id:
-            return movie
-    raise HTTPException(status_code=404, detail="Not found")
+@app.post("/messages", status_code=201)
+def create_message(message: MessageIn):   # модель -> береться з тіла
+    global next_id
+    record = {"id": next_id, **message.model_dump()}
+    messages.append(record)
+    next_id += 1
+    return record                          # повертаємо запис з id
 
-@app.get("/movies/genre/{genre}")
-def find_genre(genre: str):
-    results = [movie for movie in MOVIES if movie["genre"].lower() == genre.lower()]
-    if results:
-        return results
-    raise HTTPException(status_code=404, detail="Not Found")
+@app.get("/messages")
+def list_messages():
+    return messages
