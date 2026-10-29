@@ -1,23 +1,25 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI()
 
-class MessageIn(BaseModel):
-    author: str = Field(min_length=2, max_length=30)
-    text: str = Field(min_length=1, max_length=200)
+class UserCreate(BaseModel):          # що надсилає клієнт
+    username: str = Field(min_length=3)
+    password: str = Field(min_length=8)
 
-messages: list[dict] = []   # «база даних» у пам'яті
-next_id = 1                  # лічильник для нових id
+class UserRead(BaseModel):            # що бачить клієнт
+    id: int
+    username: str
 
-@app.post("/messages", status_code=201)
-def create_message(message: MessageIn):   # модель -> береться з тіла
-    global next_id
-    record = {"id": next_id, **message.model_dump()}
-    messages.append(record)
-    next_id += 1
-    return record                          # повертаємо запис з id
+users: dict[int, dict] = {}
 
-@app.get("/messages")
-def list_messages():
-    return messages
+@app.post("/users", response_model=UserRead, status_code=201)
+def create_user(data: UserCreate):
+    user_id = len(users) + 1
+    # зберігаємо все, навіть пароль (у справжньому житті — лише хеш!)
+    users[user_id] = {"id": user_id, **data.model_dump()}
+    return users[user_id]             # пароль відфільтрує response_model
+
+@app.get("/users", response_model=list[UserRead])
+def list_users():
+    return list(users.values())
