@@ -58,3 +58,8 @@ def update_task(todo_id: int, data: TodoUpdate):
    task = get_todo_or_404(todo_id)
    task.update(data.model_dump(exclude_unset=True))
    return task
+
+@app.delete("/todos/{todo_id}", status_code=204)
+def delete_task(todo_id: int):
+   get_todo_or_404(todo_id)
+   del todos[todo_id]
