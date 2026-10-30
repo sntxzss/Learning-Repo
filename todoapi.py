@@ -16,9 +16,15 @@ class TodoCreate(TodoBase):
    pass
 
 class TodoRead(TodoBase):
-   id: int 
+   id: int
    done: bool
    created_at: str
+
+class TodoUpdate(BaseModel):
+   title: str | None = Field(default=None, min_length=1, max_length=100)
+   desc: str | None = None
+   priority: int | None = Field(default=None, ge=1, le=5)
+   done: bool | None = None
 
 def get_todo_or_404(todo_id: int) -> dict:
    if todo_id not in todos:
@@ -46,3 +52,9 @@ def create_task(todo: TodoCreate):
    todos[next_id] = record
    next_id += 1
    return record
+
+@app.patch("/todos/{todo_id}", response_model=TodoRead)
+def update_task(todo_id: int, data: TodoUpdate):
+   task = get_todo_or_404(todo_id)
+   task.update(data.model_dump(exclude_unset=True))
+   return task
