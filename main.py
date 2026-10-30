@@ -1,25 +1,29 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 app = FastAPI()
+contacts = {1: {"name": "Оля", "city": "Львів"}}
 
-class UserCreate(BaseModel):          # що надсилає клієнт
-    username: str = Field(min_length=3)
-    password: str = Field(min_length=8)
+class Contact(BaseModel):         # повний об'єкт — для PUT
+    name: str
+    city: str = "Київ"
 
-class UserRead(BaseModel):            # що бачить клієнт
-    id: int
-    username: str
+class ContactPatch(BaseModel):    # усі поля необов'язкові — для PATCH
+    name: str | None = None
+    city: str | None = None
 
-users: dict[int, dict] = {}
+def get_or_404(contact_id: int) -> dict:
+    if contact_id not in contacts:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return contacts[contact_id]
 
-@app.post("/users", response_model=UserRead, status_code=201)
-def create_user(data: UserCreate):
-    user_id = len(users) + 1
-    # зберігаємо все, навіть пароль (у справжньому житті — лише хеш!)
-    users[user_id] = {"id": user_id, **data.model_dump()}
-    return users[user_id]             # пароль відфільтрує response_model
+@app.patch("/contacts/{contact_id}")
+def update_contact(contact_id: int, data: ContactPatch):
+    contact = get_or_404(contact_id)
+    contact.update(data.model_dump(exclude_unset=True))  # лише надіслане
+    return contact
 
-@app.get("/users", response_model=list[UserRead])
-def list_users():
-    return list(users.values())
+@app.delete("/contacts/{contact_id}", status_code=204)
+def delete_contact(contact_id: int):
+    get_or_404(contact_id)
+    del contacts[contact_id]                   # тіла відповіді немає
