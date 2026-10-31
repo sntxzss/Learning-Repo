@@ -63,3 +63,4 @@ def update_task(todo_id: int, data: TodoUpdate):
 def delete_task(todo_id: int):
    get_todo_or_404(todo_id)
    del todos[todo_id]
+
