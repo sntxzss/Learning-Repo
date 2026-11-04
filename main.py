@@ -1,29 +1,24 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, FastAPI
 
-app = FastAPI()
-contacts = {1: {"name": "Оля", "city": "Львів"}}
+# --- це був би файл app/routers/students.py ---
+students_router = APIRouter(prefix="/students", tags=["students"])
 
-class Contact(BaseModel):         # повний об'єкт — для PUT
-    name: str
-    city: str = "Київ"
+@students_router.get("")                 # шлях: /students
+def list_students():
+    return [{"id": 1, "name": "Оля"}]
 
-class ContactPatch(BaseModel):    # усі поля необов'язкові — для PATCH
-    name: str | None = None
-    city: str | None = None
+@students_router.get("/{student_id}")    # шлях: /students/{student_id}
+def get_student(student_id: int):
+    return {"id": student_id, "name": "Оля"}
 
-def get_or_404(contact_id: int) -> dict:
-    if contact_id not in contacts:
-        raise HTTPException(status_code=404, detail="Contact not found")
-    return contacts[contact_id]
+# --- це був би файл app/routers/courses.py ---
+courses_router = APIRouter(prefix="/courses", tags=["courses"])
 
-@app.patch("/contacts/{contact_id}")
-def update_contact(contact_id: int, data: ContactPatch):
-    contact = get_or_404(contact_id)
-    contact.update(data.model_dump(exclude_unset=True))  # лише надіслане
-    return contact
+@courses_router.get("")                  # шлях: /courses
+def list_courses():
+    return [{"id": 1, "title": "Python"}]
 
-@app.delete("/contacts/{contact_id}", status_code=204)
-def delete_contact(contact_id: int):
-    get_or_404(contact_id)
-    del contacts[contact_id]                   # тіла відповіді немає
+# --- це був би файл app/main.py ---
+app = FastAPI(title="School API")
+app.include_router(students_router)
+app.include_router(courses_router)
