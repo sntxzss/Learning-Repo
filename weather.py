@@ -20,3 +20,8 @@ class Filters:
 
 def note_city(logbook: Logbook, f: Annotated[Filters, Depends()]):
     logbook.append(f"місто {f.city}")
+
+@app.get("/weather", dependencies=[Depends(note_city)])
+def weather(logbook: Logbook, f: Annotated[Filters, Depends()]):
+    logbook.append("відповідь")  
+    return {"city": f.city, "min_temp": f.min_temp, "log": logbook}
