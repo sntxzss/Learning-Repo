@@ -19,4 +19,6 @@ REVIEWS = [
     {"id": 12, "product_id": 12, "rating": 5, "text": "Відмінно!"},
 ]
 
-
+@app.get("/products")
+def get_products():
+    return {"products": PRODUCTS, "reviews": REVIEWS}
