@@ -11,3 +11,15 @@ class Settings(BaseSettings):
     timeout: float = 5.0
 
 settings = Settings()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI): 
+    app.state.http = httpx.AsyncClient(timeout=settings.timeout)
+    yield
+    await app.state.http.aclose()  
+
+app = FastAPI(lifespan=lifespan)
+
+def get_http(request: Request) -> httpx.AsyncClient:  
+    return request.app.state.http
+
