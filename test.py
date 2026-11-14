@@ -23,3 +23,10 @@ app = FastAPI(lifespan=lifespan)
 def get_http(request: Request) -> httpx.AsyncClient:  
     return request.app.state.http
 
+Http = Annotated[httpx.AsyncClient, Depends(get_http)]
+Limit = Annotated[int, Query(ge=1, le=20)]
+
+@app.get("/posts")
+async def posts(http: Http, limit: Limit = 5): 
+    r = await http.get(f"{settings.base_url}/posts")
+    return r.json()[:limit]
